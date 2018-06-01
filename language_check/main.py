@@ -67,7 +67,7 @@ class RulesAction(argparse.Action):
         getattr(namespace, self.dest).update(values)
 
 
-def get_rules(rules: str) -> set:
+def get_rules(rules) -> set:
     return {rule.upper() for rule in re.findall(r"[\w\-]+", rules)}
 
 

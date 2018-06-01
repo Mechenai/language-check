@@ -186,6 +186,19 @@ class LanguageTool:
     _PORT_RE = re.compile(r"(?:https?://.*:|port\s+)(\d+)", re.I)
 
     def __init__(self, language=None, motherTongue=None, remote_server=None):
+
+
+
+
+	#*************************************************************************************
+        # Fixional hack, close down the server so we start with a clean server on every load
+	#*************************************************************************************
+        if self._server_is_alive():
+            self._terminate_server()
+
+
+
+
         if remote_server is not None:
             self._remote = True
             self._HOST = remote_server["host"]
@@ -245,12 +258,12 @@ class LanguageTool:
         return {'HUNSPELL_RULE', 'HUNSPELL_NO_SUGGEST_RULE',
                 'MORFOLOGIK_RULE_' + self.language.replace('-', '_').upper()}
 
-    def check(self, text: str, srctext=None) -> [Match]:
+    def check(self, text, srctext=None) -> [Match]:
         """Match text against enabled rules."""
         root = self._get_root(self._url, self._encode(text, srctext))
         return [Match(e.attrib) for e in root if e.tag == 'error']
 
-    def _check_api(self, text: str, srctext=None) -> bytes:
+    def _check_api(self, text, srctext=None) -> bytes:
         """Match text against enabled rules (result in XML format)."""
         root = self._get_root(self._url, self._encode(text, srctext))
         return (b'<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -270,7 +283,7 @@ class LanguageTool:
             params['enabledOnly'] = 'yes'
         return urllib.parse.urlencode(params).encode()
 
-    def correct(self, text: str, srctext=None) -> str:
+    def correct(self, text, srctext=None) -> str:
         """Automatically apply suggestions to the text."""
         return correct(text, self.check(text, srctext))
 
@@ -490,7 +503,7 @@ class LanguageTag(str):
                 raise ValueError('unsupported language: {!r}'.format(tag))
 
 
-def correct(text: str, matches: [Match]) -> str:
+def correct(text, matches) -> str:
     """Automatically apply suggestions to the text."""
     ltext = list(text)
     matches = [match for match in matches if match.replacements]
